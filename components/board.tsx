@@ -1,10 +1,13 @@
 import React from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { GameState } from "../types/game";
+import { GameMode } from "../types/game-mode";
 import useAutoMoveSensor from "../lib/useAutoMoveSensor";
 import { checkCorrect, getRandomItem, preloadImage } from "../lib/items";
 import NextItemList from "./next-item-list";
 import PlayedItemList from "./played-item-list";
+import PreciseMode from "./precise-mode";
+import MultipleChoiceMode from "./multiple-choice-mode";
 import styles from "../styles/board.module.scss";
 import Hearts from "./hearts";
 import GameOver from "./game-over";
@@ -94,6 +97,70 @@ export default function Board(props: Props) {
     }
   }
 
+  // Handle precise mode answer submission
+  async function onPreciseAnswer(answer: string, correct: boolean) {
+    if (!state.next) return;
+
+    const item = { ...state.next };
+    const newDeck = [...state.deck];
+    const newPlayed = [...state.played];
+    
+    newPlayed.push({
+      ...item,
+      played: { correct, userAnswer: answer },
+    });
+
+    const newNext = state.nextButOne;
+    const newNextButOne = getRandomItem(
+      newDeck,
+      newNext ? [...newPlayed, newNext] : newPlayed
+    );
+    const newImageCache = [preloadImage(newNextButOne.image)];
+
+    setState({
+      ...state,
+      deck: newDeck,
+      imageCache: newImageCache,
+      next: newNext,
+      nextButOne: newNextButOne,
+      played: newPlayed,
+      lives: correct ? state.lives : state.lives - 1,
+      badlyPlaced: null,
+    });
+  }
+
+  // Handle multiple choice answer selection
+  async function onMultipleChoiceAnswer(selectedIndex: number, correct: boolean) {
+    if (!state.next) return;
+
+    const item = { ...state.next };
+    const newDeck = [...state.deck];
+    const newPlayed = [...state.played];
+    
+    newPlayed.push({
+      ...item,
+      played: { correct, userChoice: selectedIndex },
+    });
+
+    const newNext = state.nextButOne;
+    const newNextButOne = getRandomItem(
+      newDeck,
+      newNext ? [...newPlayed, newNext] : newPlayed
+    );
+    const newImageCache = [preloadImage(newNextButOne.image)];
+
+    setState({
+      ...state,
+      deck: newDeck,
+      imageCache: newImageCache,
+      next: newNext,
+      nextButOne: newNextButOne,
+      played: newPlayed,
+      lives: correct ? state.lives : state.lives - 1,
+      badlyPlaced: null,
+    });
+  }
+
   // Ensure that newly placed items are rendered as draggables before trying to
   // move them to the right place if needed.
   React.useLayoutEffect(() => {
@@ -130,7 +197,32 @@ export default function Board(props: Props) {
           <Hearts lives={state.lives} />
           {state.lives > 0 ? (
             <>
-              <NextItemList next={state.next} />
+              {state.gameMode === GameMode.Classic && (
+                <NextItemList next={state.next} />
+              )}
+              
+              {state.gameMode === GameMode.Precise && state.next && (
+                <div className={styles.gameModeContainer}>
+                  <NextItemList next={state.next} />
+                  <PreciseMode
+                    item={state.next}
+                    tolerance={state.gameModeConfig.tolerance || 1}
+                    onAnswer={onPreciseAnswer}
+                  />
+                </div>
+              )}
+              
+              {state.gameMode === GameMode.MultipleChoice && state.next && (
+                <div className={styles.gameModeContainer}>
+                  <NextItemList next={state.next} />
+                  <MultipleChoiceMode
+                    item={state.next}
+                    allItems={state.deck}
+                    difficulty={state.gameModeConfig.difficultyLevel || "normal"}
+                    onAnswer={onMultipleChoiceAnswer}
+                  />
+                </div>
+              )}
             </>
           ) : (
             <GameOver
