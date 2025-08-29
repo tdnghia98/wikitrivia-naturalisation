@@ -1,0 +1,114 @@
+@import "./variables.scss";
+
+.preciseMode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 300px;
+  justify-content: center;
+
+  .question {
+    text-align: center;
+    margin-bottom: 30px;
+
+    h3 {
+      color: $text-light;
+      font-size: 24px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .tolerance {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      font-style: italic;
+    }
+  }
+
+  .inputForm {
+    width: 100%;
+    max-width: 400px;
+
+    .inputGroup {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+
+      .dateInput {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: $box-border-radius;
+        background: rgba(255, 255, 255, 0.1);
+        color: $text-light;
+        font-size: 16px;
+        text-align: center;
+        transition: all 0.2s ease;
+
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #ffffff;
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+
+      .submitButton {
+        padding: 15px 25px;
+        border: none;
+        border-radius: $box-border-radius;
+        background: #3498db;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        transform: skewX(-12deg);
+        
+        &:hover:not(:disabled) {
+          background: #2980b9;
+          transform: skewX(-12deg) translateY(-2px);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: skewX(-12deg);
+        }
+      }
+    }
+
+    .help {
+      text-align: center;
+      
+      p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 12px;
+        margin: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .preciseMode {
+    .inputForm {
+      .inputGroup {
+        flex-direction: column;
+        
+        .submitButton {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

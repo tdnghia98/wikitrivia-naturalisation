@@ -1,4 +1,5 @@
 import { Item, PlayedItem } from "./item";
+import { GameMode, GameModeConfig } from "./game-mode";
 
 export interface GameState {
   badlyPlaced: {
@@ -14,4 +15,6 @@ export interface GameState {
   next: Item | null;
   nextButOne: Item | null;
   played: PlayedItem[];
+  gameMode: GameMode;
+  gameModeConfig: GameModeConfig;
 }

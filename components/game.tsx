@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { GameState } from "../types/game";
 import { Item } from "../types/item";
+import { GameMode } from "../types/game-mode";
 import createState from "../lib/create-state";
 import Board from "./board";
 import Loading from "./loading";
@@ -13,6 +14,7 @@ export default function Game() {
   const [loaded, setLoaded] = useState(false);
   const [started, setStarted] = useState(false);
   const [items, setItems] = useState<Item[] | null>(null);
+  const [currentGameMode, setCurrentGameMode] = useState<GameMode>(GameMode.Classic);
 
   React.useEffect(() => {
     const fetchGameData = async () => {
@@ -38,19 +40,24 @@ export default function Game() {
   React.useEffect(() => {
     (async () => {
       if (items !== null) {
-        setState(await createState(items));
+        setState(await createState(items, currentGameMode));
         setLoaded(true);
       }
     })();
-  }, [items]);
+  }, [items, currentGameMode]);
 
   const resetGame = React.useCallback(() => {
     (async () => {
       if (items !== null) {
-        setState(await createState(items));
+        setState(await createState(items, currentGameMode));
       }
     })();
-  }, [items]);
+  }, [items, currentGameMode]);
+
+  const startGame = React.useCallback((gameMode: GameMode) => {
+    setCurrentGameMode(gameMode);
+    setStarted(true);
+  }, []);
 
   const [highscore, setHighscore] = React.useState<number>(
     Number(localStorage.getItem("highscore") ?? "0")
@@ -67,7 +74,7 @@ export default function Game() {
 
   if (!started) {
     return (
-      <Instructions highscore={highscore} start={() => setStarted(true)} />
+      <Instructions highscore={highscore} start={startGame} />
     );
   }
 
